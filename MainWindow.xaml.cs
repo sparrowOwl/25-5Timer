@@ -79,14 +79,14 @@ namespace WpfApp_25to5Timer
 
     class ProgresCircleControl
     {
-        private double Progress { get; set; }
+        private double Progress;
         public int Full = 0;
         public int Rest = 0;
-        private double Radius { get; set; }
-        private double Angle { get; set; }
-        private double Size { get; set; }
-        private System.Windows.Point StartPoint { get; set; }
-        private double Margin { get; set; }
+        private double Radius;
+        private double Angle;
+        private double Size;
+        private System.Windows.Point StartPoint;
+        private double Margin;
         private ArcSegment Arc;
         private TextBlock textBlock;
         private PointAnimation pAnm = new PointAnimation();
@@ -282,7 +282,6 @@ namespace WpfApp_25to5Timer
          )
 
         {
-
             DoubleAnimation anm = new DoubleAnimation(
                 from, to, new Duration(TimeSpan.FromSeconds(duration))
             );
@@ -294,20 +293,15 @@ namespace WpfApp_25to5Timer
 
             if (StoryboardDic.ContainsKey(targetStoryboard) == false)
             {
-
                 StoryboardDic.Add(targetStoryboard,new Storyboard());
                 Debug.Print("newStoryboard! : "+targetStoryboard);
-
                 StoryboardIsMoveDic.Add(targetStoryboard,"stop");
-
             }
-
             StoryboardDic[targetStoryboard].Children.Add(anm);
             StoryboardDic[targetStoryboard].Completed += (sender, e) =>
             {
                 StoryboardIsMoveDic[targetStoryboard] = "stop";
             };
-
         }
 
         public void changeImage(string name)

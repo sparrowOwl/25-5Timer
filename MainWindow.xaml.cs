@@ -24,8 +24,7 @@ namespace WpfApp_25to5Timer
             { "開始" , "はじまるよ～" },
             { "停止" , "ストップ" },
             { "一時停止" , "いちじていし" },
-            { "終了" , "じかんだよ～" },
-            { "過剰クリック" , "はやい！" },
+            { "終了" , "じかんだよ～" }
         };
 
         public static Dictionary<string, string[]> RandomComment = new Dictionary<string, string[]>()

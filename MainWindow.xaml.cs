@@ -11,27 +11,17 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using static System.Net.Mime.MediaTypeNames;
 
-
-
-
 namespace WpfApp_25to5Timer
 {
     // 設定
     static class Settings
     {
-
         public const int SECONDS_PER_ROUND = 60;
-
         public const int TASK_TIME = 25;
         public const int REST_TIME = 5;
         public static int NowMinutesPerRound { get; set; } = TASK_TIME;
-
         public const int QUICK_JUDGMENT = 6;
-        
-
         public static bool CanControlMessage { get; set; } = true;
-
-
         public static Dictionary<string, string> AnnouncementComment { get; private set; } = new Dictionary<string, string>() {
             { "残り3分" , "あと3分" },
             { "残り1分" , "あと1分!" },
@@ -44,7 +34,6 @@ namespace WpfApp_25to5Timer
             { "タイマー設定伺い" , "つぎはどうする？" },
             { "休憩終了伺い" , "休憩終わり？" },
             { "休憩開始" , "ごゆっくり～" },
-
         };
 
         public static Dictionary<string, string[]> BirdCommentAtClick { get; private set; } = new Dictionary<string, string[]>()
@@ -94,8 +83,6 @@ namespace WpfApp_25to5Timer
 
         // 鳥画像のrotateOriginに点を表示するか
         public const bool IS_BIRD_ROTATION_STANDARD_DISPLAY = false;
-
-
 
         // タスクウィンドウにある初期説明文
         public static string[] TaskWindowInitialDescription { get; private set; } = {

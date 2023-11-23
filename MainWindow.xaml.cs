@@ -7,61 +7,79 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using static System.Net.Mime.MediaTypeNames;
 
+
+
+
 namespace WpfApp_25to5Timer
 {
+    // 設定
     static class Settings
     {
-        // 鳥画像のrotateOriginに点を表示するか
-        public const bool OriginShow = false;
-        public static Dictionary<string, string> Comment = new Dictionary<string, string>() {
-            { "残り5分" , "あと5分" },
+
+        public const int SECONDS_PER_ROUND = 60;
+
+        public const int TASK_TIME = 25;
+        public const int REST_TIME = 5;
+        public static int NowMinutesPerRound { get; set; } = TASK_TIME;
+
+        public const int QUICK_JUDGMENT = 6;
+        
+
+        public static bool CanControlMessage { get; set; } = true;
+
+
+        public static Dictionary<string, string> AnnouncementComment { get; private set; } = new Dictionary<string, string>() {
+            { "残り3分" , "あと3分" },
             { "残り1分" , "あと1分!" },
+            { "開始待ち" , "タスクが決まったら\n ▶ボタンを\nおしてね" },
             { "開始" , "はじまるよ～" },
             { "停止" , "ストップ" },
             { "一時停止" , "いちじていし" },
-            { "終了" , "じかんだよ～" }
+            { "終了" , "じかんだよ～" },
+            { "過剰クリック" , "はやい！" },
+            { "タイマー設定伺い" , "つぎはどうする？" },
+            { "休憩終了伺い" , "休憩終わり？" },
+            { "休憩開始" , "ごゆっくり～" },
+
         };
 
-        public static Dictionary<string, string[]> RandomComment = new Dictionary<string, string[]>()
+        public static Dictionary<string, string[]> BirdCommentAtClick { get; private set; } = new Dictionary<string, string[]>()
         {
             {"enaga"   ,  new string[]{
                 "がんばれー" ,
                 "ふぁいとー" ,
                 "ぐっどらっく！" ,
-                "おいしいごはんがまってるよー",
-                "もうちょっとがんばってー",
-                "もっとあつくなるんだー！",
-                "いっしょにがんばろう！"}
+                "おいしいごはんが\nまってるよー",
+                "もうちょっと\nがんばってー",
+                "もっと\nあつくなるんだー！",
+                "いっしょに\nがんばろう！"}
             },
             {"sparrow" ,  new string[]{
-                "情熱をときはなてー！" ,
+                "情熱を\nときはなてー！" ,
                 "好きこそ、無敵！",
-                "熱いたましいを見せてー！",
-                "勝利をつかみ取ってー！",
-                "この一戦が人生だー！",
+                "熱いたましいを\n見せてー！",
+                "勝利を\nつかみ取ってー！",
+                "この一戦が\n人生だー！",
                 "不撓不屈だー！"} 
             }
         };
 
-        public static int TimeUnit = 60;
-        public static int M_defo = 25;
-        public static int QuickJudgment = 6;
-        public static string[] BirdNames = { "enaga", "sparrow" };
 
-        public static double[][] NewXYList =
+        public static string[] BirdNames { get; private set; } = { "enaga", "sparrow" };
+
+        public static double[][] BirdMovePositions { get; private set; } =
         {
             new double[]{ -45 ,  0 },
             new double[]{ -20 ,  5 },
             new double[]{   0 ,  0 },
-            new double[]{   0 , 55 }
+            new double[]{   30 , -18}
         };
 
-        public static Dictionary<String, System.Windows.Point> BirdRotatePoint = new Dictionary<String, System.Windows.Point>()
+        public static Dictionary<String, System.Windows.Point> BirdRotatePoint { get; private set; } = new Dictionary<String, System.Windows.Point>()
         {
             { "body", new System.Windows.Point(0.5, 0.6)},
             { "reg", new System.Windows.Point(0.5, 0.55)},
@@ -69,26 +87,83 @@ namespace WpfApp_25to5Timer
             { "head",new System.Windows.Point(0.5, 0.45)}
         };
 
-        public static Dictionary<String, double> BirdCanvasSize = new Dictionary<String, double> (){
+        public static Dictionary<String, double> BirdCanvasSize { get; private set; } = new Dictionary<String, double> (){
             {"width",180 },
             {"height",180 }
         };
-        
+
+        // 鳥画像のrotateOriginに点を表示するか
+        public const bool IS_BIRD_ROTATION_STANDARD_DISPLAY = false;
+
+
+
+        // タスクウィンドウにある初期説明文
+        public static string[] TaskWindowInitialDescription { get; private set; } = {
+            "25分集中、5分休憩で 作業効率UP！",
+            "【使い方】",
+            "   こ の 説 明 を 消 し 、あなたのタスクを入力して、タイマーをスタート。",
+            "   ",
+            "【詳しい使い方】",
+            "   ① こ の 説 明 を 消 す。",
+            "　      ※画面右下の「全削除」をご活用ください",
+            "   ② この欄にメモ帳感覚でタスクを入力。",
+            "　    25分単位で、タスクを細切れにしてください。",
+            "　      ※改行でタスクを区切ります",
+            "　      ※先頭のタスクが「現在のタスク」です",
+            "   ③ タスクを登録してください",
+            "　      ※画面右下「タスクを確定」ボタンを押すか",
+            "　      　画面右上の「×」ボタンで画面を閉じると登録",
+            "   ④ 円形タイマー左下の「▶」ボタンを押してスタート",
+            "   ⑤ まずは25分タスクに集中してください",
+            "   　 時間になりましたら、画面中央に鳥が来てお知らせします。",
+            "   　 ストレッチ、外の空気を吸う、何でも結構です。",
+            "　　  リラックスしてください。",
+            "　 ⑥ また25分集中、休憩　を繰り返します。",
+            "　 　 ずっと集中しているよりも、効率UPが見込めます。",
+            "  ",
+            "【シマエナガもいいけれど雀も好きなへ】  ",
+            "  　素早く連続で、鳥をクリックすると変身します。",
+            "      ※シマエナガ ⇔ 雀",            
+        };
+
+
+
+
+        // タスクリスト
+        public static List<string> TaskList { get; set; } = new List<string>();
+
+        // タスクを完了した回数
+        public static int FinishTaskCount { get; set; } = 0;
+
+        // タスクを完了した回数に対するコメント
+        public static String[] CheeringOfCount { get; set; } =
+        {
+            "えらい！",
+            "すてき！",
+            "すごい！",
+            "すばらしい！",
+            "やったー！"
+        };
+
+        // タスクウィンドウがユーザーによって、非表示でなくCloseにされてしまったかどうか
+        public static bool TaskWinClosed { get; set; } = false;
+
     };
 
+    // タイマー残時間の円形プログレスバー
     class ProgresCircleControl
     {
-        private double Progress;
+        private double Progress { get; set; }
         public int Full = 0;
         public int Rest = 0;
-        private double Radius;
-        private double Angle;
-        private double Size;
-        private System.Windows.Point StartPoint;
-        private double Margin;
-        private ArcSegment Arc;
-        private TextBlock textBlock;
-        private PointAnimation pAnm = new PointAnimation();
+        private double Radius { get; set; }
+        private double Angle { get; set; }
+        private double Size { get; set; }
+        private System.Windows.Point StartPoint { get; set; }
+        private double Margin { get; set; }
+        private ArcSegment Arc { get; set; }
+        private TextBlock IntTextBlock { get; set; }
+        private PointAnimation PointAnm { get; set; } = new PointAnimation();
 
         public ProgresCircleControl(
             ArcSegment arc,
@@ -105,13 +180,13 @@ namespace WpfApp_25to5Timer
             Radius = Arc.Size.Width;
             Size = parentStartPoint.X - parentStartPoint.Y;
             Margin = parentStartPoint.Y;
-            textBlock = tb;
-            pAnm.Duration = new Duration(TimeSpan.FromSeconds(1));
-            pAnm.RepeatBehavior = new RepeatBehavior(1);
-            pAnm.AutoReverse = false;
+            IntTextBlock = tb;
+            PointAnm.Duration = new Duration(TimeSpan.FromSeconds(1));
+            PointAnm.RepeatBehavior = new RepeatBehavior(1);
+            PointAnm.AutoReverse = false;
         }
 
-        public Double ResAngle(double val)
+        public  Double ResAngle(double val)
         {
             double result = Math.Floor(val * 100) * 3.6;
             if (result <= 0) { return 0.1; }
@@ -131,7 +206,7 @@ namespace WpfApp_25to5Timer
         public bool Tick(int reduce)
         {
             Rest -= reduce;
-            textBlock.Text = "" + Rest;
+            IntTextBlock.Text = "" + Rest;
             if (Rest < 1)
             {      
                 Arc.Point = StartPoint;
@@ -156,13 +231,13 @@ namespace WpfApp_25to5Timer
         }
     }
 
-
+    // キャラクターの画像が属するキャンバス
     class CanvasContainer
     {
 
-        public String Name = "";
-        public Canvas Canvas = new Canvas();
-        public String ParentName = "all";
+        public String Name { get; set; } = "";
+        public Canvas Canvas { get; set; } = new Canvas();
+        public String ParentName { get; set; } = "all";
         public CanvasContainer(String name, String parentName, Double width, Double height, int zindex, System.Windows.Point RenderTransformOrigin, System.Windows.Media.Color color)
         {
             Name = name;
@@ -175,7 +250,7 @@ namespace WpfApp_25to5Timer
             Canvas.RenderTransformOrigin = RenderTransformOrigin;
             Canvas.SetZIndex(Canvas, zindex);
 
-            if (Settings.OriginShow)
+            if (Settings.IS_BIRD_ROTATION_STANDARD_DISPLAY)
             {
                 Ellipse myEllipse = new Ellipse();
                 myEllipse.Height = 6;
@@ -193,32 +268,33 @@ namespace WpfApp_25to5Timer
         }
     }
 
+    // キャラクター
     class Character
     {
-        public String characterName = Settings.BirdNames[0];
-        private double canvasWidh;
-        private double canvasHeight;
-        public double positionX = -10;
-        public double positionY = 0;
-        public bool isCanMosyonChange= false;
-        private const bool _autoReverse = true;
-        public Canvas AllCanvas = new Canvas();
-        public Dictionary<String, CanvasContainer> canvasDic = new Dictionary<String, CanvasContainer>()
+        public String characterName { get; set; } = Settings.BirdNames[0];
+        private double canvasWidh { get; set; }
+        private double canvasHeight { get; set; }
+        public double positionX { get; set; } = -10;
+        public double positionY { get; set; } = 0;
+        public bool isCanMosyonChange { get; set; } = false;
+        private const bool AUTO_REVERSE = true;
+        public Canvas AllCanvas { get; set; } = new Canvas();
+        public Dictionary<String, CanvasContainer> canvasDic { get; set; } = new Dictionary<String, CanvasContainer>()
         {
             {"all",new CanvasContainer("all","noParents",Settings.BirdCanvasSize["width"],Settings.BirdCanvasSize["height"],0,new System.Windows.Point(0.5, 0.5),System.Windows.Media.Color.FromArgb(0,0,0,0))}
         };
 
-        public Dictionary<string, Storyboard> StoryboardDic = new Dictionary<string, Storyboard>()
+        public Dictionary<string, Storyboard> StoryboardDic { get; set; } = new Dictionary<string, Storyboard>()
         {
             {"default",new Storyboard() },
         };
 
-        public Dictionary<string, string> StoryboardIsMoveDic = new Dictionary<string, string>()
+        public Dictionary<string, string> StoryboardIsMoveDic { get; set; } = new Dictionary<string, string>()
         {
             {"default","stop"},
         };
 
-        public Dictionary<string, System.Windows.Controls.Image> imageDic = new Dictionary<string, System.Windows.Controls.Image>();
+        public Dictionary<string, System.Windows.Controls.Image> imageDic { get; set; } = new Dictionary<string, System.Windows.Controls.Image>();
 
         public Character(string name, double width, double height)
         {
@@ -276,11 +352,12 @@ namespace WpfApp_25to5Timer
             PropertyPath _PropertyPath,
             double from, double to, double duration,
             RepeatBehavior _RepeatBehavior,
-            bool autoReverse = _autoReverse,
+            bool autoReverse = AUTO_REVERSE,
             string targetStoryboard = "defo"
          )
 
         {
+
             DoubleAnimation anm = new DoubleAnimation(
                 from, to, new Duration(TimeSpan.FromSeconds(duration))
             );
@@ -292,15 +369,18 @@ namespace WpfApp_25to5Timer
 
             if (StoryboardDic.ContainsKey(targetStoryboard) == false)
             {
+
                 StoryboardDic.Add(targetStoryboard,new Storyboard());
-                Debug.Print("newStoryboard! : "+targetStoryboard);
                 StoryboardIsMoveDic.Add(targetStoryboard,"stop");
+
             }
+
             StoryboardDic[targetStoryboard].Children.Add(anm);
             StoryboardDic[targetStoryboard].Completed += (sender, e) =>
             {
                 StoryboardIsMoveDic[targetStoryboard] = "stop";
             };
+
         }
 
         public void changeImage(string name)
@@ -440,12 +520,13 @@ namespace WpfApp_25to5Timer
         }
     }
 
-    class hukidasiAnimation
+    // 吹き出しアニメーション
+    class HukidasiAnimation
     {
 
-        public Storyboard _StoryboardFeedIn = new Storyboard();
-        public Storyboard _StoryboardFeedOut = new Storyboard();
-        public hukidasiAnimation()
+        public Storyboard _StoryboardFeedIn { get; set; } = new Storyboard();
+        public Storyboard _StoryboardFeedOut { get; set; } = new Storyboard();
+        public HukidasiAnimation()
         {
             Storyboard.SetTargetName(feedIn, "messageBack");
             Storyboard.SetTargetName(feedOut, "messageBack");
@@ -481,20 +562,42 @@ namespace WpfApp_25to5Timer
              _StoryboardFeedIn.Stop();
         }
     }
+
+
+
+
+
     public partial class MainWindow : Window
     {
         private Character bird;
-        private hukidasiAnimation hukidasiAnimation = new hukidasiAnimation();
-        private DispatcherTimer _timer = new DispatcherTimer();
-        private DispatcherTimer tooClick_timer = new DispatcherTimer();
-        private int tooClickCount = 0;
-        private ProgresCircleControl circle_S;
-        private ProgresCircleControl circle_M;
+        private HukidasiAnimation HukidasiAnimation = new HukidasiAnimation();
+        private DispatcherTimer mainTimer = new DispatcherTimer();
+        private DispatcherTimer timerDetermineQuickClick = new DispatcherTimer();
+        private int quickClickCount = 0;
+        private ProgresCircleControl secondsProgressCircle;
+        private ProgresCircleControl minutesProgressCircle;
+        public Window1 taskWin;
+
         public MainWindow()
         {
+
+
             InitializeComponent();
+
+
+            // MainWindowのどこをドラッグしてもウィンドウを移動できるようにする
             this.MouseLeftButtonDown += (sender, e) => { this.DragMove(); };
 
+            // 画面右下へ移動
+            this.Top = SystemParameters.WorkArea.Height - this.MaxHeight;
+            this.Left = SystemParameters.WorkArea.Width - this.Width;
+
+
+            // タスクウィンドウの表示
+            taskWin = new Window1();
+            taskWin.Show();
+
+            // 鳥の設定
             bird = new Character(Settings.BirdNames[0], Settings.BirdCanvasSize["width"], Settings.BirdCanvasSize["height"]);
             canvas_bird.Children.Add(bird.AllCanvas);
             foreach (var item in bird.canvasDic)
@@ -508,53 +611,63 @@ namespace WpfApp_25to5Timer
                 startSwing();
             };
 
-            circle_S = new ProgresCircleControl(timePath_S, timePath_S_figure.StartPoint, showTime_S, Settings.TimeUnit);
-            circle_M = new ProgresCircleControl(timePath_M, timePath_M_figure.StartPoint, showTime_M, Settings.M_defo);
 
-            TimeSet(Settings.M_defo);
-            _timer.Interval = new TimeSpan(0, 0, 1);
-            _timer.Tick += (sender, e) =>
+            // タイマーの設定
+            secondsProgressCircle = new ProgresCircleControl(timePath_S, timePath_S_figure.StartPoint, showTime_S, Settings.SECONDS_PER_ROUND);
+            minutesProgressCircle = new ProgresCircleControl(timePath_M, timePath_M_figure.StartPoint, showTime_M, Settings.TASK_TIME);
+            TimeSet(Settings.TASK_TIME);
+            messageControl(true, Settings.AnnouncementComment["開始待ち"]);
+            mainTimer.Interval = new TimeSpan(0, 0, 1);
+            mainTimer.Tick += (sender, e) =>
             {
-                if (circle_S.Tick(1))
+                if (secondsProgressCircle.Tick(1))
                 {
-                    circle_M.Tick(1);
-                    if (circle_M.Rest > 0)
+                    minutesProgressCircle.Tick(1);
+                    if (minutesProgressCircle.Rest > 0)
                     {
-                        circle_S.Rest = Settings.TimeUnit;
-                        circle_S.Tick(0);
-                        if (circle_M.Rest == 4)
+                        secondsProgressCircle.Rest = Settings.SECONDS_PER_ROUND-1;
+                        secondsProgressCircle.Tick(0);
+                        if (minutesProgressCircle.Rest == 2)
                         {
-                            messageControl(false, Settings.Comment["残り5分"]);
+                            messageControl(false, Settings.AnnouncementComment["残り3分"]);
                         }
-                        else if(circle_M.Rest == 0)
+                        else if(minutesProgressCircle.Rest == 0)
                         {
-                            messageControl(false, Settings.Comment["残り1分"]);
+                            messageControl(false, Settings.AnnouncementComment["残り1分"]);
                         }
 
                     }
                     else
                     {
-                            _timer.Stop();
-                            messageControl(true, Settings.Comment["終了"]);
-                            Debug.Print("残時間"+ circle_M.Rest+":"+ circle_S.Rest);
-                            this.Top = SystemParameters.WorkArea.Height / 2 - this.Height / 2;
-                            this.Left = SystemParameters.WorkArea.Width / 2 - this.Width / 2;
+                        mainTimer.Stop();
+
+
+                        if (Settings.TaskList.Count > 0 && Settings.NowMinutesPerRound != Settings.REST_TIME)
+                        {
+                            askTaskFinished();
+                        }
+                        else
+                        {                            
+                            askNextTime();
+                        }
+
+                        this.Top = SystemParameters.WorkArea.Height / 2 - this.Height / 2;
+                        this.Left = SystemParameters.WorkArea.Width / 2 - this.Width / 2 - 110; // この110は、タスクウィンドウに被ってしまう事への対策
                     }
                 }
             };
 
 
-            TimerStart();
-            tooClick_timer.Interval = new TimeSpan(0, 0, 1);
-            tooClick_timer.Tick += (sender, e) =>
+            timerDetermineQuickClick.Interval = new TimeSpan(0, 0, 1);
+            timerDetermineQuickClick.Tick += (sender, e) =>
             {
-                if (tooClickCount > Settings.QuickJudgment)
+                if (quickClickCount > Settings.QUICK_JUDGMENT)
                 {
                     Debug.Print("素早いクリック！");
-                    tooClickCount = 0;
+                    quickClickCount = 0;
                     bird.isCanMosyonChange = false;
                     Random r1 = new System.Random();
-                    int index = r1.Next(0, Settings.NewXYList.Length);
+                    int index = r1.Next(0, Settings.BirdMovePositions.Length);
                     string[] d = { };
 
                     if (Settings.BirdNames.Length <2) {
@@ -572,106 +685,175 @@ namespace WpfApp_25to5Timer
                         }
                     }
 
-                    Debug.Print(" birdIndex"+ birdIndex);
                     bird.changeImage(Settings.BirdNames[birdIndex]);                
-                    bird.setBirdAnimation(Settings.NewXYList[index][0], Settings.NewXYList[index][1]);
+                    bird.setBirdAnimation(Settings.BirdMovePositions[index][0], Settings.BirdMovePositions[index][1]);
                     bird.StoryControl("jumpToNewPosition", "all", "reStart");
 
                 }
                 else
                 {
-                    tooClickCount-=3;
-                    if (tooClickCount <0)
+                    quickClickCount-=3;
+                    if (quickClickCount <0)
                     {
-                        tooClick_timer.Stop();
-                        Debug.Print("素早いクリック判定停止！ 現在 " + tooClickCount);
+                        timerDetermineQuickClick.Stop();
+                        Debug.Print("素早いクリック判定停止！ 現在 " + quickClickCount);
                     }
                 }
             };
 
             this.Closing += (e, s) =>
             {
-                _timer.Stop();
-                tooClick_timer.Stop();
+                mainTimer.Stop();
+                timerDetermineQuickClick.Stop();
+                taskWin.Close();
             };
         }
 
         private void TimeSet(int minute)
         {
-            circle_S.Rest = 0;
-            circle_M.Rest = minute;
-            circle_M.Full = minute;
-            Settings.M_defo = minute;
-            circle_S.Tick(0);
-            circle_M.Tick(0);
+            secondsProgressCircle.Rest = 0;
+            minutesProgressCircle.Rest = minute;
+            minutesProgressCircle.Full = minute;
+            Settings.NowMinutesPerRound = minute;
+            secondsProgressCircle.Tick(0);
+            minutesProgressCircle.Tick(0);
+
+
+            timeAskGrid.Visibility = Visibility.Collapsed;
         }
 
         private void TimerStart()
         {
-            messageControl(false, Settings.Comment["開始"]);
+            Settings.CanControlMessage = true;
+
+            restAskGrid.Visibility = Visibility.Collapsed;
+
+            if (Settings.TaskWinClosed) { taskWin = new Window1(); }
+            taskWin.Hide();
+
+
+            if (Settings.NowMinutesPerRound == Settings.REST_TIME)
+            {
+                messageControl(true, Settings.AnnouncementComment["休憩開始"]);
+            }
+            else if (Settings.TaskList.Count > 0)
+            {
+                messageControl(false,Settings.TaskList[0] + "\n"+　 Settings.AnnouncementComment["開始"]);
+            }
+            else
+            {
+                messageControl(false, Settings.AnnouncementComment["開始"]);
+            }
+
             this.Top = SystemParameters.WorkArea.Height - this.Height;
             this.Left = SystemParameters.WorkArea.Width - this.Width;
-            if (circle_S.Rest <= 0 && circle_M.Rest <= 0)
+
+            if (Settings.TaskWinClosed) { taskWin = new Window1(); }
+
+
+            if (secondsProgressCircle.Rest <= 0 && minutesProgressCircle.Rest <= 0)
             {
-                TimeSet(Settings.M_defo);
+                TimeSet(Settings.NowMinutesPerRound);
             }
-            _timer.Start();
+            mainTimer.Start();
         }
+
 
         private void messageControl(bool show, string text)
         {
+            if (Settings.CanControlMessage == false) { Debug.Print("弾かれました　"+text); return; }
             messageText.Text = text;
-            hukidasiAnimation.Stop();
+            HukidasiAnimation.Stop();
             if (show)
             {
-                hukidasiAnimation._StoryboardFeedIn.Begin(messageBack, true);       
+                HukidasiAnimation._StoryboardFeedIn.Begin(messageBack, true);       
                 messageBack.Visibility = Visibility.Visible;               
             }
             else
             {
-                hukidasiAnimation._StoryboardFeedOut.Begin(messageBack, true);
+                HukidasiAnimation._StoryboardFeedOut.Begin(messageBack, true);
             }
         }
+
+        private void askTaskFinished()
+        {
+            taskAskGrid.Visibility = Visibility.Visible;
+            timeAskGrid.Visibility = Visibility.Collapsed;
+            messageControl(true, Settings.AnnouncementComment["終了"]);
+            if (Settings.TaskWinClosed) { taskWin = new Window1(); }
+            taskWin.Show();
+            taskWin.topTaskRemoveButton.Visibility = Visibility.Collapsed;
+
+            Settings.CanControlMessage = false;
+        }
+
+
+        private void askNextTime()
+        {
+            taskAskGrid.Visibility = Visibility.Collapsed;
+            taskWin.topTaskRemoveButton.Visibility = Visibility.Visible;
+            if (Settings.NowMinutesPerRound == Settings.REST_TIME)
+            {
+                messageControl(true, Settings.AnnouncementComment["終了"] + "\n" + Settings.AnnouncementComment["休憩終了伺い"]);
+                restAskGrid.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                messageControl(true,  Settings.AnnouncementComment["タイマー設定伺い"]);
+                timeAskGrid.Visibility = Visibility.Visible;
+            }
+            Settings.CanControlMessage = false;
+        }
+
+
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             TimerStart();
             bird.StoryControl("defo", "all", "pause");
             bird.StoryControl("twoJump", "all", "start");
-            messageControl(false, Settings.Comment["開始"]);
             bird.StoryboardDic["twoJump"].Completed += (sender, e) =>
-            {                
+            {
                 startSwing();
-                bird.StoryboardDic["twoJump"].Completed -= (sender, e) =>
-                {
-                    startSwing();
-                };
             };
         }
 
         private void Set25min_Button_Click(object sender, RoutedEventArgs e)
         {
-            TimeSet(25);
+            TimeSet(Settings.TASK_TIME);
         }
 
         private void Set5min_Button_Click(object sender, RoutedEventArgs e)
         {
-            TimeSet(5);
+            TimeSet(Settings.REST_TIME);
+            
+        }
+
+        private void Set25minAndStart_Button_Click(object sender, RoutedEventArgs e)
+        {
+            TimeSet(Settings.TASK_TIME);
+            StartButton_Click(sender, e);
+        }
+
+        private void Set5minAndStart_Button_Click(object sender, RoutedEventArgs e)
+        {
+            TimeSet(Settings.REST_TIME);
+            StartButton_Click(sender, e);
         }
 
         private void Pause_Button_Click(object sender, RoutedEventArgs e)
         {
-            _timer.Stop();
+            mainTimer.Stop();
             bird.StoryControl("defo", "all", "pause");
-            messageControl(true, Settings.Comment["一時停止"]);
+            messageControl(true, Settings.AnnouncementComment["一時停止"]);
         }
 
         private void Stop_Button_Click(object sender, RoutedEventArgs e)
         {
-            _timer.Stop();
+            mainTimer.Stop();
             bird.StoryControl("defo", "all", "pause");
-            messageControl(true, Settings.Comment["停止"]);
-            TimeSet(Settings.M_defo);
+            messageControl(true, Settings.AnnouncementComment["停止"]);
+            TimeSet(Settings.NowMinutesPerRound);
         }
 
         private void startSwing()
@@ -684,13 +866,36 @@ namespace WpfApp_25to5Timer
         private void canvas_bird_MouseDown(object sender, MouseButtonEventArgs e)
         {
             bird.StoryControl("jump", "all", "start");
-            messageControl(false, Settings.RandomComment[bird.characterName][(new System.Random()).Next(0, Settings.RandomComment[bird.characterName].Length)]);
-            if (tooClickCount<=0)
+            messageControl(false, Settings.BirdCommentAtClick[bird.characterName][(new System.Random()).Next(0, Settings.BirdCommentAtClick[bird.characterName].Length)]);
+            if (quickClickCount<=0)
             {
-                tooClick_timer.Start();
+                timerDetermineQuickClick.Start();
             }
-            tooClickCount++;
-            Debug.Print("clicked 現在" + (tooClickCount + 1));
+            quickClickCount++;
+            Debug.Print("clicked 現在" + (quickClickCount + 1));
+        }
+        private void taskWindowShowButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (Settings.TaskWinClosed) { taskWin = new Window1(); }
+            taskWin.Show();
+        }
+        private void taskIncomplete(object sender, RoutedEventArgs e)
+        {
+            Settings.CanControlMessage = true;
+            askNextTime();
+        }
+
+        private void topTaskRemove(object sender, RoutedEventArgs e)
+        {
+            Settings.CanControlMessage = true;
+            askNextTime();
+            taskWin.topTaskRemove();
+        }
+        private void moreRest_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.CanControlMessage = true;
+            TimerStart();
         }
     }
 }

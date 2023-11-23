@@ -48,8 +48,7 @@ namespace WpfApp_25to5Timer
                 Settings.TaskWinClosed = true;
             };
 
-            // もしタスクリストの長さが０以上ならば、おそらくユーザーによって閉じられている
-            // タスクリストから表示を復活させる
+            // もしタスクリストの長さが０以上ならば、タスクリストから表示を復活させる
             if (Settings.TaskList.Count >0)
             {
                 taskChange("");

@@ -11,17 +11,27 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using static System.Net.Mime.MediaTypeNames;
 
+
+
+
 namespace WpfApp_25to5Timer
 {
     // 設定
     static class Settings
     {
+
         public const int SECONDS_PER_ROUND = 60;
+
         public const int TASK_TIME = 25;
         public const int REST_TIME = 5;
         public static int NowMinutesPerRound { get; set; } = TASK_TIME;
+
         public const int QUICK_JUDGMENT = 6;
+        
+
         public static bool CanControlMessage { get; set; } = true;
+
+
         public static Dictionary<string, string> AnnouncementComment { get; private set; } = new Dictionary<string, string>() {
             { "残り3分" , "あと3分" },
             { "残り1分" , "あと1分!" },
@@ -34,6 +44,7 @@ namespace WpfApp_25to5Timer
             { "タイマー設定伺い" , "つぎはどうする？" },
             { "休憩終了伺い" , "休憩終わり？" },
             { "休憩開始" , "ごゆっくり～" },
+
         };
 
         public static Dictionary<string, string[]> BirdCommentAtClick { get; private set; } = new Dictionary<string, string[]>()
@@ -84,6 +95,8 @@ namespace WpfApp_25to5Timer
         // 鳥画像のrotateOriginに点を表示するか
         public const bool IS_BIRD_ROTATION_STANDARD_DISPLAY = false;
 
+
+
         // タスクウィンドウにある初期説明文
         public static string[] TaskWindowInitialDescription { get; private set; } = {
             "25分集中、5分休憩で 作業効率UP！",
@@ -92,13 +105,13 @@ namespace WpfApp_25to5Timer
             "   ",
             "【詳しい使い方】",
             "   ① こ の 説 明 を 消 す。",
-            "　      ※画面右下の「全削除」をご活用ください",
+            "　      ※画面上側の「全削除」をご活用ください",
             "   ② この欄にメモ帳感覚でタスクを入力。",
             "　    25分単位で、タスクを細切れにしてください。",
             "　      ※改行でタスクを区切ります",
             "　      ※先頭のタスクが「現在のタスク」です",
             "   ③ タスクを登録してください",
-            "　      ※画面右下「タスクを確定」ボタンを押すか",
+            "　      ※画面上側「タスクを確定」ボタンを押すか",
             "　      　画面右上の「×」ボタンで画面を閉じると登録",
             "   ④ 円形タイマー左下の「▶」ボタンを押してスタート",
             "   ⑤ まずは25分タスクに集中してください",
@@ -123,7 +136,7 @@ namespace WpfApp_25to5Timer
         public static int FinishTaskCount { get; set; } = 0;
 
         // タスクを完了した回数に対するコメント
-        public static String[] CheeringOfCount { get; set; } =
+        public static String[] CheeringOfCount { get; } =
         {
             "えらい！",
             "すてき！",
@@ -132,8 +145,22 @@ namespace WpfApp_25to5Timer
             "やったー！"
         };
 
+        // タスクを完了した回数に応じた画像 
+        public static String[] CheeringOfCountImage { get;} =
+{
+            "eggs_1.png",
+            "eggs_2.png",
+            "eggs_3.png",
+            "eggs_4.png",
+            "eggs_5.png",
+            "eggs_6.png"
+        };
+
         // タスクウィンドウがユーザーによって、非表示でなくCloseにされてしまったかどうか
         public static bool TaskWinClosed { get; set; } = false;
+
+
+
 
     };
 
@@ -173,7 +200,7 @@ namespace WpfApp_25to5Timer
             PointAnm.AutoReverse = false;
         }
 
-        public  Double ResAngle(double val)
+        public  static Double ResAngle(double val)
         {
             double result = Math.Floor(val * 100) * 3.6;
             if (result <= 0) { return 0.1; }
@@ -225,24 +252,24 @@ namespace WpfApp_25to5Timer
         public String Name { get; set; } = "";
         public Canvas Canvas { get; set; } = new Canvas();
         public String ParentName { get; set; } = "all";
-        public CanvasContainer(String name, String parentName, Double width, Double height, int zindex, System.Windows.Point RenderTransformOrigin, System.Windows.Media.Color color)
+        public CanvasContainer(String name, String parentName, Double width, Double height, int zindex, System.Windows.Point RenderTransformOrigin, Color color)
         {
             Name = name;
             Canvas.Name = name;
             ParentName = parentName;
             Canvas.Width = width;
             Canvas.Height = height;
-            RotateTransform rt = new RotateTransform();
+            RotateTransform rt = new ();
             Canvas.RenderTransform = rt;
             Canvas.RenderTransformOrigin = RenderTransformOrigin;
             Canvas.SetZIndex(Canvas, zindex);
 
             if (Settings.IS_BIRD_ROTATION_STANDARD_DISPLAY)
             {
-                Ellipse myEllipse = new Ellipse();
+                Ellipse myEllipse = new ();
                 myEllipse.Height = 6;
                 myEllipse.Width = 6;
-                SolidColorBrush mySolidColorBrush = new SolidColorBrush();
+                SolidColorBrush mySolidColorBrush = new ();
                 mySolidColorBrush.Color = color;
                 myEllipse.Fill = mySolidColorBrush;
                 myEllipse.StrokeThickness = 1;
@@ -258,15 +285,15 @@ namespace WpfApp_25to5Timer
     // キャラクター
     class Character
     {
-        public String characterName { get; set; } = Settings.BirdNames[0];
-        private double canvasWidh { get; set; }
-        private double canvasHeight { get; set; }
-        public double positionX { get; set; } = -10;
-        public double positionY { get; set; } = 0;
-        public bool isCanMosyonChange { get; set; } = false;
+        public String CharacterName { get; set; } = Settings.BirdNames[0];
+        private double CanvasWidh { get; set; }
+        private double CanvasHeight { get; set; }
+        public double PositionX { get; set; } = -10;
+        public double PositionY { get; set; } = 0;
+        public bool IsCanMosyonChange { get; set; } = false;
         private const bool AUTO_REVERSE = true;
         public Canvas AllCanvas { get; set; } = new Canvas();
-        public Dictionary<String, CanvasContainer> canvasDic { get; set; } = new Dictionary<String, CanvasContainer>()
+        public Dictionary<String, CanvasContainer> CanvasDic { get; set; } = new Dictionary<String, CanvasContainer>()
         {
             {"all",new CanvasContainer("all","noParents",Settings.BirdCanvasSize["width"],Settings.BirdCanvasSize["height"],0,new System.Windows.Point(0.5, 0.5),System.Windows.Media.Color.FromArgb(0,0,0,0))}
         };
@@ -281,18 +308,18 @@ namespace WpfApp_25to5Timer
             {"default","stop"},
         };
 
-        public Dictionary<string, System.Windows.Controls.Image> imageDic { get; set; } = new Dictionary<string, System.Windows.Controls.Image>();
+        public Dictionary<string, System.Windows.Controls.Image> ImageDic { get; set; } = new Dictionary<string, System.Windows.Controls.Image>();
 
         public Character(string name, double width, double height)
         {
-            canvasWidh = width;
-            canvasHeight = height;
-            canvasDic["all"].Canvas.Width = width;
-            canvasDic["all"].Canvas.Height = height;
-            AllCanvas.Children.Add(canvasDic["all"].Canvas);
-            characterName = name;
-            SetBirdImg(width, height);
-            setBirdAnimation(positionX, positionY);
+            CanvasWidh = width;
+            CanvasHeight = height;
+            CanvasDic["all"].Canvas.Width = width;
+            CanvasDic["all"].Canvas.Height = height;
+            AllCanvas.Children.Add(CanvasDic["all"].Canvas);
+            CharacterName = name;
+            SetBirdImg();
+            SetBirdAnimation(PositionX, PositionY);
         }
 
         public void StoryControl(string storyName , string elemName , string move)
@@ -304,27 +331,27 @@ namespace WpfApp_25to5Timer
                 case "start":
                     if (StoryboardIsMoveDic[storyName] == "stop")
                     {
-                        StoryboardDic[storyName].Begin(canvasDic[elemName].Canvas, true);
+                        StoryboardDic[storyName].Begin(CanvasDic[elemName].Canvas, true);
                         StoryboardIsMoveDic[storyName] = "start";
                     }
                     else
                     {                
-                        StoryboardDic[storyName].Resume(canvasDic[elemName].Canvas);
+                        StoryboardDic[storyName].Resume(CanvasDic[elemName].Canvas);
                         StoryboardIsMoveDic[storyName] = "start";
                     }
                     break;
                 case "reStart":
-                    StoryboardDic[storyName].Begin(canvasDic[elemName].Canvas, true);
+                    StoryboardDic[storyName].Begin(CanvasDic[elemName].Canvas, true);
                     StoryboardIsMoveDic[storyName] = "start";
                     break;
 
                 case "stop":
-                    StoryboardDic[storyName].Stop(canvasDic[elemName].Canvas);
+                    StoryboardDic[storyName].Stop(CanvasDic[elemName].Canvas);
                     StoryboardIsMoveDic[storyName] = "stop";
                     break;
                 case "pause":
                     if (StoryboardIsMoveDic[storyName] == "stop"){ return; }
-                    StoryboardDic[storyName].Pause(canvasDic[elemName].Canvas);
+                    StoryboardDic[storyName].Pause(CanvasDic[elemName].Canvas);
                     StoryboardIsMoveDic[storyName] = "pause";
                     break;
                 default:
@@ -345,7 +372,7 @@ namespace WpfApp_25to5Timer
 
         {
 
-            DoubleAnimation anm = new DoubleAnimation(
+            DoubleAnimation anm = new (
                 from, to, new Duration(TimeSpan.FromSeconds(duration))
             );
 
@@ -370,12 +397,12 @@ namespace WpfApp_25to5Timer
 
         }
 
-        public void changeImage(string name)
+        public void ChangeImage(string name)
         {
-            characterName = name;
-            foreach (var item in imageDic)
+            CharacterName = name;
+            foreach (var item in ImageDic)
             {
-                imageDic[item.Key].Source = new BitmapImage(new Uri("pack://application:,,,/Resources/" + characterName + "_" + item.Key + ".png"));
+                ImageDic[item.Key].Source = new BitmapImage(new Uri("pack://application:,,,/Resources/" + CharacterName + "_" + item.Key + ".png"));
             }
         }
 
@@ -385,48 +412,48 @@ namespace WpfApp_25to5Timer
             Image.Width = width;
             Image.Height = height;
             Image.Stretch = Stretch.Fill;
-            Image.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/" + characterName + "_" + name + ".png"));
+            Image.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/" + CharacterName + "_" + name + ".png"));
             return Image;
         }
 
-        public void SetImageToCanvas(String name, String  parentGroupName ,Double width, Double height,int zindex, System.Windows.Point rotateCener, System.Windows.Media.Color color)
+        public void SetImageToCanvas(String name, String  parentGroupName ,int zindex, System.Windows.Point rotateCener, System.Windows.Media.Color color)
         {
-            if (canvasDic.ContainsKey(parentGroupName) == false && name != parentGroupName)
+            if (CanvasDic.ContainsKey(parentGroupName) == false && name != parentGroupName)
             {
                 Debug.Print("親に指定されたキャンバス ["+ parentGroupName + "] が存在しません。zindexは0、rotateOriginは0.5,0.5で新規作成します ");
-                canvasDic.Add(parentGroupName, new CanvasContainer(parentGroupName, "all", canvasWidh, canvasHeight, 0, new System.Windows.Point(0.5, 0.5), System.Windows.Media.Color.FromArgb(255,255,0,0)));
-                canvasDic[parentGroupName].Canvas.Name = parentGroupName;
-                canvasDic["all"].Canvas.Children.Add(canvasDic[parentGroupName].Canvas);
+                CanvasDic.Add(parentGroupName, new CanvasContainer(parentGroupName, "all", CanvasWidh, CanvasHeight, 0, new System.Windows.Point(0.5, 0.5), System.Windows.Media.Color.FromArgb(255,255,0,0)));
+                CanvasDic[parentGroupName].Canvas.Name = parentGroupName;
+                CanvasDic["all"].Canvas.Children.Add(CanvasDic[parentGroupName].Canvas);
             }
 
-            canvasDic.Add(name, new CanvasContainer(name, parentGroupName, canvasWidh, canvasHeight, zindex, rotateCener,color));
-            canvasDic[name].Canvas.Name = name;
+            CanvasDic.Add(name, new CanvasContainer(name, parentGroupName, CanvasWidh, CanvasHeight, zindex, rotateCener,color));
+            CanvasDic[name].Canvas.Name = name;
             if (name != parentGroupName)
             {
-               canvasDic[parentGroupName].Canvas.Children.Add(canvasDic[name].Canvas);
+               CanvasDic[parentGroupName].Canvas.Children.Add(CanvasDic[name].Canvas);
             }
 
-            var image = MakeImageInCanvas(name, canvasWidh, canvasHeight);
-            imageDic.Add(name,image);
-            canvasDic[name].Canvas.Children.Add(imageDic[name]);
+            var image = MakeImageInCanvas(name, CanvasWidh, CanvasHeight);
+            ImageDic.Add(name,image);
+            CanvasDic[name].Canvas.Children.Add(ImageDic[name]);
 
         }
 
-        public void SetBirdImg( double width, double height)
+        public void SetBirdImg( )
         {
-            SetImageToCanvas("body", "all", width, height,   0, Settings.BirdRotatePoint["body"], System.Windows.Media.Color.FromArgb(255, 255, 255, 0)  );
-            SetImageToCanvas("reg",  "body", width, height, -1, Settings.BirdRotatePoint["reg"],  System.Windows.Media.Color.FromArgb(255, 0, 255, 0));
-            SetImageToCanvas("tail", "body", width, height, -2, Settings.BirdRotatePoint["tail"], System.Windows.Media.Color.FromArgb(255, 0, 255, 255));
-            SetImageToCanvas("head", "body", width, height,  1, Settings.BirdRotatePoint["head"], System.Windows.Media.Color.FromArgb(255, 255, 0, 255));
+            SetImageToCanvas("body", "all",   0, Settings.BirdRotatePoint["body"], System.Windows.Media.Color.FromArgb(255, 255, 255, 0)  );
+            SetImageToCanvas("reg",  "body", -1, Settings.BirdRotatePoint["reg"],  System.Windows.Media.Color.FromArgb(255, 0, 255, 0));
+            SetImageToCanvas("tail", "body", -2, Settings.BirdRotatePoint["tail"], System.Windows.Media.Color.FromArgb(255, 0, 255, 255));
+            SetImageToCanvas("head", "body",  1, Settings.BirdRotatePoint["head"], System.Windows.Media.Color.FromArgb(255, 255, 0, 255));
 
         }
 
-        public void setBirdAnimation(double _positionX, double _positionY)
+        public void SetBirdAnimation(double _PositionX, double _PositionY)
         {
             SetDoubleAnimation(
                 "all",
                 new PropertyPath(Canvas.TopProperty),
-                positionY,_positionY, 0.5,
+                PositionY,_PositionY, 0.5,
                 new RepeatBehavior(1),
                 false,
                 "jumpToNewPosition"
@@ -435,7 +462,7 @@ namespace WpfApp_25to5Timer
             SetDoubleAnimation(
                 "all",
                 new PropertyPath(Canvas.LeftProperty),
-                positionX, _positionX, 0.25,
+                PositionX, _PositionX, 0.25,
                 new RepeatBehavior(1),
                 false,
                 "jumpToNewPosition"
@@ -450,13 +477,13 @@ namespace WpfApp_25to5Timer
                 "jumpToNewPosition"
             );
 
-            positionX = _positionX;
-            positionY = _positionY;
+            PositionX = _PositionX;
+            PositionY = _PositionY;
 
             SetDoubleAnimation(
                 "all",
                 new PropertyPath(Canvas.TopProperty),
-                positionY, positionY - 10, 0.2,
+                PositionY, PositionY - 10, 0.2,
                 new RepeatBehavior(1),
                 true,
                 "jump"
@@ -465,7 +492,7 @@ namespace WpfApp_25to5Timer
             SetDoubleAnimation(
                 "all",
                 new PropertyPath(Canvas.TopProperty),
-                positionY, positionY - 10, 0.1,
+                PositionY, PositionY - 10, 0.1,
                 new RepeatBehavior(2),
                 true,
                 "twoJump"
@@ -474,12 +501,12 @@ namespace WpfApp_25to5Timer
             SetDoubleAnimation(
                 "all",
                 new PropertyPath(Canvas.LeftProperty),
-                positionX, positionX - 30, 0.4,
+                PositionX, PositionX - 30, 0.4,
                 new RepeatBehavior(1),
                 false,
                 "toLeft"
             );
-            Canvas.SetLeft(canvasDic["all"].Canvas, -15);
+            Canvas.SetLeft(CanvasDic["all"].Canvas, -15);
 
             SetDoubleAnimation(
                 "head",
@@ -511,21 +538,21 @@ namespace WpfApp_25to5Timer
     class HukidasiAnimation
     {
 
-        public Storyboard _StoryboardFeedIn { get; set; } = new Storyboard();
-        public Storyboard _StoryboardFeedOut { get; set; } = new Storyboard();
+        public Storyboard StoryboardFeedIn { get; set; } = new Storyboard();
+        public Storyboard StoryboardFeedOut { get; set; } = new Storyboard();
         public HukidasiAnimation()
         {
             Storyboard.SetTargetName(feedIn, "messageBack");
             Storyboard.SetTargetName(feedOut, "messageBack");
             Storyboard.SetTargetProperty(feedIn, new PropertyPath(Control.OpacityProperty));
             Storyboard.SetTargetProperty(feedOut, new PropertyPath(Control.OpacityProperty));
-            _StoryboardFeedIn.Children.Add(feedIn);
-            _StoryboardFeedOut.Children.Add(feedOut);
+            StoryboardFeedIn.Children.Add(feedIn);
+            StoryboardFeedOut.Children.Add(feedOut);
 
         }
 
 
-        private DoubleAnimation feedIn = new DoubleAnimation()
+        private readonly DoubleAnimation feedIn = new()
         {
             From = 0.0,
             To = 1,
@@ -534,7 +561,7 @@ namespace WpfApp_25to5Timer
             AutoReverse = false
         };
 
-        private DoubleAnimation feedOut = new DoubleAnimation()
+        private readonly DoubleAnimation feedOut = new ()
         {
             From = 1.0,
             To = 0.0,
@@ -545,8 +572,8 @@ namespace WpfApp_25to5Timer
 
         public void Stop()
         {
-             _StoryboardFeedOut.Stop();
-             _StoryboardFeedIn.Stop();
+             StoryboardFeedOut.Stop();
+             StoryboardFeedIn.Stop();
         }
     }
 
@@ -557,13 +584,21 @@ namespace WpfApp_25to5Timer
     public partial class MainWindow : Window
     {
         private Character bird;
-        private HukidasiAnimation HukidasiAnimation = new HukidasiAnimation();
-        private DispatcherTimer mainTimer = new DispatcherTimer();
-        private DispatcherTimer timerDetermineQuickClick = new DispatcherTimer();
+        private HukidasiAnimation HukidasiAnimation = new ();
+
+        private DispatcherTimer mainTimer = new ();
+        private DispatcherTimer timerDetermineQuickClick = new ();
         private int quickClickCount = 0;
+
         private ProgresCircleControl secondsProgressCircle;
         private ProgresCircleControl minutesProgressCircle;
+
+
         public Window1 taskWin;
+
+
+
+
 
         public MainWindow()
         {
@@ -580,6 +615,9 @@ namespace WpfApp_25to5Timer
             this.Left = SystemParameters.WorkArea.Width - this.Width;
 
 
+
+
+
             // タスクウィンドウの表示
             taskWin = new Window1();
             taskWin.Show();
@@ -587,23 +625,30 @@ namespace WpfApp_25to5Timer
             // 鳥の設定
             bird = new Character(Settings.BirdNames[0], Settings.BirdCanvasSize["width"], Settings.BirdCanvasSize["height"]);
             canvas_bird.Children.Add(bird.AllCanvas);
-            foreach (var item in bird.canvasDic)
+            foreach (var item in bird.CanvasDic)
             {
-                RegisterName(item.Key, bird.canvasDic[item.Key].Canvas);
+                RegisterName(item.Key, bird.CanvasDic[item.Key].Canvas);
             }
-            startSwing();
+            StartSwing();
 
             bird.StoryboardDic["jumpToNewPosition"].Completed += (sender, e) =>
             {
-                startSwing();
+                StartSwing();
             };
 
 
             // タイマーの設定
             secondsProgressCircle = new ProgresCircleControl(timePath_S, timePath_S_figure.StartPoint, showTime_S, Settings.SECONDS_PER_ROUND);
             minutesProgressCircle = new ProgresCircleControl(timePath_M, timePath_M_figure.StartPoint, showTime_M, Settings.TASK_TIME);
+
+
+
             TimeSet(Settings.TASK_TIME);
-            messageControl(true, Settings.AnnouncementComment["開始待ち"]);
+            MessageControl(true, Settings.AnnouncementComment["開始待ち"]);
+
+
+
+
             mainTimer.Interval = new TimeSpan(0, 0, 1);
             mainTimer.Tick += (sender, e) =>
             {
@@ -616,11 +661,11 @@ namespace WpfApp_25to5Timer
                         secondsProgressCircle.Tick(0);
                         if (minutesProgressCircle.Rest == 2)
                         {
-                            messageControl(false, Settings.AnnouncementComment["残り3分"]);
+                            MessageControl(false, Settings.AnnouncementComment["残り3分"]);
                         }
                         else if(minutesProgressCircle.Rest == 0)
                         {
-                            messageControl(false, Settings.AnnouncementComment["残り1分"]);
+                            MessageControl(false, Settings.AnnouncementComment["残り1分"]);
                         }
 
                     }
@@ -631,11 +676,11 @@ namespace WpfApp_25to5Timer
 
                         if (Settings.TaskList.Count > 0 && Settings.NowMinutesPerRound != Settings.REST_TIME)
                         {
-                            askTaskFinished();
+                            AskTaskFinished();
                         }
                         else
                         {                            
-                            askNextTime();
+                            AskNextTime();
                         }
 
                         this.Top = SystemParameters.WorkArea.Height / 2 - this.Height / 2;
@@ -645,6 +690,11 @@ namespace WpfApp_25to5Timer
             };
 
 
+
+
+
+
+
             timerDetermineQuickClick.Interval = new TimeSpan(0, 0, 1);
             timerDetermineQuickClick.Tick += (sender, e) =>
             {
@@ -652,10 +702,10 @@ namespace WpfApp_25to5Timer
                 {
                     Debug.Print("素早いクリック！");
                     quickClickCount = 0;
-                    bird.isCanMosyonChange = false;
-                    Random r1 = new System.Random();
+                    bird.IsCanMosyonChange = false;
+                    Random r1 = new ();
                     int index = r1.Next(0, Settings.BirdMovePositions.Length);
-                    string[] d = { };
+                    string[] d = Array.Empty<string>();
 
                     if (Settings.BirdNames.Length <2) {
                         MessageBox.Show("エラー！鳥の名前は2つ以上登録してください！");
@@ -666,14 +716,14 @@ namespace WpfApp_25to5Timer
                     while (true)
                     {
                         birdIndex = new System.Random().Next(0, Settings.BirdNames.Length);
-                        if (bird.characterName != Settings.BirdNames[birdIndex])
+                        if (bird.CharacterName != Settings.BirdNames[birdIndex])
                         {
                             break;
                         }
                     }
 
-                    bird.changeImage(Settings.BirdNames[birdIndex]);                
-                    bird.setBirdAnimation(Settings.BirdMovePositions[index][0], Settings.BirdMovePositions[index][1]);
+                    bird.ChangeImage(Settings.BirdNames[birdIndex]);                
+                    bird.SetBirdAnimation(Settings.BirdMovePositions[index][0], Settings.BirdMovePositions[index][1]);
                     bird.StoryControl("jumpToNewPosition", "all", "reStart");
 
                 }
@@ -721,15 +771,15 @@ namespace WpfApp_25to5Timer
 
             if (Settings.NowMinutesPerRound == Settings.REST_TIME)
             {
-                messageControl(true, Settings.AnnouncementComment["休憩開始"]);
+                MessageControl(true, Settings.AnnouncementComment["休憩開始"]);
             }
             else if (Settings.TaskList.Count > 0)
             {
-                messageControl(false,Settings.TaskList[0] + "\n"+　 Settings.AnnouncementComment["開始"]);
+                MessageControl(false,Settings.TaskList[0] + "\n"+　 Settings.AnnouncementComment["開始"]);
             }
             else
             {
-                messageControl(false, Settings.AnnouncementComment["開始"]);
+                MessageControl(false, Settings.AnnouncementComment["開始"]);
             }
 
             this.Top = SystemParameters.WorkArea.Height - this.Height;
@@ -746,27 +796,33 @@ namespace WpfApp_25to5Timer
         }
 
 
-        private void messageControl(bool show, string text)
+
+
+        private void MessageControl(bool show, string text)
         {
             if (Settings.CanControlMessage == false) { Debug.Print("弾かれました　"+text); return; }
             messageText.Text = text;
             HukidasiAnimation.Stop();
             if (show)
             {
-                HukidasiAnimation._StoryboardFeedIn.Begin(messageBack, true);       
+                HukidasiAnimation.StoryboardFeedIn.Begin(messageBack, true);       
                 messageBack.Visibility = Visibility.Visible;               
             }
             else
             {
-                HukidasiAnimation._StoryboardFeedOut.Begin(messageBack, true);
+                HukidasiAnimation.StoryboardFeedOut.Begin(messageBack, true);
             }
         }
 
-        private void askTaskFinished()
+
+        private void AskTaskFinished()
         {
             taskAskGrid.Visibility = Visibility.Visible;
             timeAskGrid.Visibility = Visibility.Collapsed;
-            messageControl(true, Settings.AnnouncementComment["終了"]);
+
+
+            MessageControl(true, Settings.AnnouncementComment["終了"]);
+
             if (Settings.TaskWinClosed) { taskWin = new Window1(); }
             taskWin.Show();
             taskWin.topTaskRemoveButton.Visibility = Visibility.Collapsed;
@@ -775,20 +831,26 @@ namespace WpfApp_25to5Timer
         }
 
 
-        private void askNextTime()
+        private void AskNextTime()
         {
             taskAskGrid.Visibility = Visibility.Collapsed;
             taskWin.topTaskRemoveButton.Visibility = Visibility.Visible;
+
+
             if (Settings.NowMinutesPerRound == Settings.REST_TIME)
             {
-                messageControl(true, Settings.AnnouncementComment["終了"] + "\n" + Settings.AnnouncementComment["休憩終了伺い"]);
+                MessageControl(true, Settings.AnnouncementComment["終了"] + "\n" + Settings.AnnouncementComment["休憩終了伺い"]);
                 restAskGrid.Visibility = Visibility.Visible;
+
             }
             else
             {
-                messageControl(true,  Settings.AnnouncementComment["タイマー設定伺い"]);
+                MessageControl(true,  Settings.AnnouncementComment["タイマー設定伺い"]);
                 timeAskGrid.Visibility = Visibility.Visible;
+
             }
+
+
             Settings.CanControlMessage = false;
         }
 
@@ -797,11 +859,15 @@ namespace WpfApp_25to5Timer
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             TimerStart();
+
             bird.StoryControl("defo", "all", "pause");
             bird.StoryControl("twoJump", "all", "start");
+
+
             bird.StoryboardDic["twoJump"].Completed += (sender, e) =>
             {
-                startSwing();
+                StartSwing();
+
             };
         }
 
@@ -826,34 +892,36 @@ namespace WpfApp_25to5Timer
         {
             TimeSet(Settings.REST_TIME);
             StartButton_Click(sender, e);
+
         }
+
 
         private void Pause_Button_Click(object sender, RoutedEventArgs e)
         {
             mainTimer.Stop();
             bird.StoryControl("defo", "all", "pause");
-            messageControl(true, Settings.AnnouncementComment["一時停止"]);
+            MessageControl(true, Settings.AnnouncementComment["一時停止"]);
         }
 
         private void Stop_Button_Click(object sender, RoutedEventArgs e)
         {
             mainTimer.Stop();
             bird.StoryControl("defo", "all", "pause");
-            messageControl(true, Settings.AnnouncementComment["停止"]);
+            MessageControl(true, Settings.AnnouncementComment["停止"]);
             TimeSet(Settings.NowMinutesPerRound);
         }
 
-        private void startSwing()
+        private void StartSwing()
         {
             Debug.Print("再スタート");
             bird.StoryControl("defo", "all", "start");
-            bird.isCanMosyonChange = true;
+            bird.IsCanMosyonChange = true;
         }
 
-        private void canvas_bird_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Canvas_bird_MouseDown(object sender, MouseButtonEventArgs e)
         {
             bird.StoryControl("jump", "all", "start");
-            messageControl(false, Settings.BirdCommentAtClick[bird.characterName][(new System.Random()).Next(0, Settings.BirdCommentAtClick[bird.characterName].Length)]);
+            MessageControl(false, Settings.BirdCommentAtClick[bird.CharacterName][(new System.Random()).Next(0, Settings.BirdCommentAtClick[bird.CharacterName].Length)]);
             if (quickClickCount<=0)
             {
                 timerDetermineQuickClick.Start();
@@ -861,25 +929,34 @@ namespace WpfApp_25to5Timer
             quickClickCount++;
             Debug.Print("clicked 現在" + (quickClickCount + 1));
         }
-        private void taskWindowShowButton_Click(object sender, RoutedEventArgs e)
+
+        private void TaskWindowShowButton_Click(object sender, RoutedEventArgs e)
         {
 
             if (Settings.TaskWinClosed) { taskWin = new Window1(); }
             taskWin.Show();
-        }
-        private void taskIncomplete(object sender, RoutedEventArgs e)
-        {
-            Settings.CanControlMessage = true;
-            askNextTime();
+
         }
 
-        private void topTaskRemove(object sender, RoutedEventArgs e)
+
+
+
+
+
+
+        private void TaskIncomplete(object sender, RoutedEventArgs e)
         {
             Settings.CanControlMessage = true;
-            askNextTime();
-            taskWin.topTaskRemove();
+            AskNextTime();
         }
-        private void moreRest_Button_Click(object sender, RoutedEventArgs e)
+
+        private void TopTaskRemove(object sender, RoutedEventArgs e)
+        {
+            Settings.CanControlMessage = true;
+            AskNextTime();
+            taskWin.TopTaskRemove();
+        }
+        private void MoreRest_Button_Click(object sender, RoutedEventArgs e)
         {
             Settings.CanControlMessage = true;
             TimerStart();

@@ -9,6 +9,7 @@
         Topmost="True" OpacityMask="White" Icon="Resources/Icon.ico" SnapsToDevicePixels="True" VerticalAlignment="Bottom" Background="#00C18080">
 
 
+
     <Window.Resources>
         <!--桜型のボタン-->
         <Style TargetType="Button" x:Key="sakuraButton">
@@ -53,7 +54,11 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+
+
     </Window.Resources>
+
 
 
     <Grid VerticalAlignment="Bottom">
@@ -176,11 +181,20 @@
 
         <!--メイン表示キャンバス-->
         <Canvas x:Name="mainCanvas" Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="1" Grid.Column="1" >
+
             <Image Width="180" Height="180" Source="Resources/sakura_back.png" Panel.ZIndex="-1" IsHitTestVisible="False"/>
             <Image Width="180" Height="180" Source="Resources/eda3.png" Panel.ZIndex="2" IsHitTestVisible="False"/>
-            <Canvas x:Name="canvas_bird" Width="180" Height="180" MouseDown="canvas_bird_MouseDown" Panel.ZIndex="0" />
+
+
+            <Canvas x:Name="canvas_bird" Width="180" Height="180" MouseDown="Canvas_bird_MouseDown" Panel.ZIndex="0" />
+
             <Image Width="180" Height="180" Source="Resources/sakura_front.png" IsHitTestVisible="False" Panel.ZIndex="4"  />
+
+
+
         </Canvas>
+
+
 
 
 
@@ -199,7 +213,7 @@
         <TextBlock x:Name="showTime_M" Text="25" FontSize="60" FontFamily="Bahnschrift" TextAlignment="Center" LineHeight="90" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="100" Height="76" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="100" IsHitTestVisible="False"/>
         <TextBlock x:Name="showTime_S" Text="60" FontSize="18" FontFamily="Bahnschrift" TextAlignment="Center" LineHeight="90" Foreground="#FFDC8383" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="100" Height="83" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="100" IsHitTestVisible="False"/>
 
-        <!--刻限などのメッセージの表示-->
+        <!--刻限メッセージの表示-->
         <Border x:Name="messageBack"  BorderBrush="Black" Background="White" Grid.ColumnSpan="2" BorderThickness="3,2,3,6" CornerRadius="30,30,30,30" VerticalAlignment="Bottom" MinHeight="50" Padding="0,10,0,10" Grid.RowSpan="1" Margin="0,0,0,-25">
             <StackPanel>
                 <TextBox x:Name="messageText" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Tenhamasen Font Ver.3" BorderBrush="{x:Null}" Background="{x:Null}" FontSize="18" Text="じかんだよ～" TextWrapping="WrapWithOverflow" SelectionBrush="{x:Null}" BorderThickness="0,0,0,0" Cursor="Arrow" IsTabStop="False" IsReadOnly="True"/>
@@ -208,15 +222,15 @@
                         <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="unfinishedButton" Content="まだ未完" FontFamily="Tenhamasen Font Ver.3" FontSize="14" Background="#FFF4FFFB" Click="taskIncomplete" Margin="5,5,5,5"/>
-                    <Button Content="タスク完了！" FontFamily="Tenhamasen Font Ver.3" FontSize="14" Background="#FFBEFFE7" Click="topTaskRemove" Grid.Column="1" Margin="5,5,5,5" />
+                    <Button x:Name="unfinishedButton" Content="まだ未完" FontFamily="Tenhamasen Font Ver.3" FontSize="14" Background="#FFF4FFFB" Click="TaskIncomplete" Margin="5,5,5,5"/>
+                    <Button Content="タスク完了！" FontFamily="Tenhamasen Font Ver.3" FontSize="14" Background="#FFBEFFE7" Click="TopTaskRemove" Grid.Column="1" Margin="5,5,5,5" />
                 </Grid>
                 <Grid x:Name="restAskGrid" Visibility="Collapsed" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button Content="あと5分" FontFamily="Tenhamasen Font Ver.3" FontSize="14" Background="#FFFFDFD3" Click="moreRest_Button_Click" Margin="5,5,5,5"/>
+                    <Button Content="あと5分" FontFamily="Tenhamasen Font Ver.3" FontSize="14" Background="#FFFFDFD3" Click="MoreRest_Button_Click" Margin="5,5,5,5"/>
                     <Button Content="休憩おわり！" FontFamily="Tenhamasen Font Ver.3" FontSize="14" Background="#FFBEFFE7" Click="Set25minAndStart_Button_Click" Grid.Column="1" Margin="5,5,5,5" />
                 </Grid>
                 <Grid x:Name="timeAskGrid" Visibility="Collapsed" >
@@ -230,8 +244,11 @@
             </StackPanel>
         </Border>
         
+        
+        
+
         <!--タスクウィンドウ表示ボタン　桜の葉-->
-        <Button x:Name="taskWindowShowButton" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="64,1,0,0" Style="{StaticResource sakuraButton}" RenderTransformOrigin="0.5,0.5" FontFamily="Consolas" FontSize="14" Width="30" Height="30" Foreground="#FF004A3E" Click="taskWindowShowButton_Click">
+        <Button x:Name="taskWindowShowButton" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="64,1,0,0" Style="{StaticResource sakuraButton}" RenderTransformOrigin="0.5,0.5" FontFamily="Consolas" FontSize="14" Width="30" Height="30" Foreground="#FF004A3E" Click="TaskWindowShowButton_Click">
             <Button.Resources>
                 <Style TargetType="{x:Type Border}">
                     <Setter Property="CornerRadius" Value="2,10,2,10" />
@@ -386,5 +403,7 @@
                     </TextBlock.RenderTransform>25</TextBlock>
             </Button>
         </Canvas>
+
     </Grid>
+
 </Window>
